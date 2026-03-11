@@ -1,0 +1,140 @@
+/* Custom resets and scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Base styles for markdown content in AI responses */
+.markdown-body h1 {
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+    color: #111827;
+}
+
+.markdown-body h2 {
+    font-size: 1.25em;
+    font-weight: 700;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    color: #1f2937;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.3em;
+}
+
+.markdown-body h3 {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-top: 0.8em;
+    margin-bottom: 0.4em;
+    color: #374151;
+}
+
+.markdown-body p {
+    margin-bottom: 0.8em;
+    line-height: 1.6;
+}
+
+.markdown-body ul {
+    list-style-type: disc;
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+}
+
+.markdown-body ol {
+    list-style-type: decimal;
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+}
+
+.markdown-body li {
+    margin-bottom: 0.4em;
+    line-height: 1.5;
+}
+
+.markdown-body strong {
+    font-weight: 600;
+    color: #111827;
+}
+
+.markdown-body em {
+    font-style: italic;
+}
+
+.markdown-body code {
+    background-color: #f3f4f6;
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.875em;
+    color: #db2777;
+}
+
+.markdown-body pre {
+    background-color: #1f2937;
+    color: #f8fafc;
+    padding: 1em;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+    font-size: 1em;
+}
+
+.markdown-body blockquote {
+    border-left: 4px solid #d1d5db;
+    padding-left: 1em;
+    color: #4b5563;
+    font-style: italic;
+    margin-bottom: 1em;
+}
+
+/* Animations */
+@keyframes slide-up {
+    0% {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Mode Transition */
+.mode-btn.active {
+    background-color: #374151;
+    color: white;
+}
+
+.mode-btn.active i {
+    color: #818cf8;
+}
+
+/* Hide UI elements initially */
+.hidden {
+    display: none !important;
+}

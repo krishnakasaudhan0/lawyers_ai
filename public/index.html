@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LawGPT - AI Legal Assistant</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked.js for parsing markdown response -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="bg-gray-100 flex h-screen text-gray-800 font-sans overflow-hidden">
+
+    <!-- Auth Modal (Overlay) -->
+    <div id="auth-modal" class="fixed inset-0 z-50 bg-gray-900 bg-opacity-95 flex items-center justify-center transition-opacity">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl relative">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-scale-balanced text-indigo-600"></i> LawGPT
+            </h2>
+            
+            <div class="flex border-b border-gray-200 mb-6 font-medium text-sm">
+                <button id="tab-login" class="flex-1 py-3 border-b-2 border-indigo-600 text-indigo-600 transition">Login</button>
+                <button id="tab-register" class="flex-1 py-3 text-gray-500 hover:text-gray-700 transition">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Email</label>
+                        <input type="email" id="login-email" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Password</label>
+                        <input type="password" id="login-password" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                    </div>
+                    <div id="login-error" class="hidden text-red-500 text-sm"></div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white rounded-lg py-2.5 font-medium hover:bg-indigo-700 transition">Login</button>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="hidden">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Username</label>
+                        <input type="text" id="register-username" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Email</label>
+                        <input type="email" id="register-email" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Password</label>
+                        <input type="password" id="register-password" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" minlength="6" required>
+                    </div>
+                    <div id="register-error" class="hidden text-red-500 text-sm"></div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white rounded-lg py-2.5 font-medium hover:bg-indigo-700 transition">Sign Up</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <aside class="w-72 bg-gray-900 text-white flex flex-col hidden md:flex shrink-0 shadow-lg z-20">
+        <div class="p-5 border-b border-gray-800 flex items-center justify-between">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-scale-balanced text-indigo-400"></i> LawGPT
+            </h1>
+            <div class="text-xs text-gray-400 font-medium" id="user-display"></div>
+            <button id="logout-btn" class="text-gray-400 hover:text-white transition" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+        
+        <div class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Features
+        </div>
+
+        <nav class="px-3 space-y-1">
+            <button id="mode-query" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition mode-btn font-medium" data-mode="query">
+                <i class="fa-solid fa-gavel w-5 text-center text-indigo-400"></i> Legal Query
+            </button>
+            <button id="mode-scan" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition mode-btn font-medium" data-mode="scan">
+                <i class="fa-solid fa-file-contract w-5 text-center"></i> Contract Scanner
+            </button>
+            <button id="mode-generate" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition mode-btn font-medium" data-mode="generate">
+                <i class="fa-solid fa-file-signature w-5 text-center"></i> Document Gen
+            </button>
+        </nav>
+
+        <div class="px-4 py-3 mt-4 text-xs font-semibold text-gray-500 uppercase tracking-wider flex justify-between items-center border-t border-gray-800">
+            <span>Chat History</span>
+            <button id="refresh-history-btn" class="hover:text-white"><i class="fa-solid fa-rotate-right"></i></button>
+        </div>
+        
+        <div class="flex-1 px-3 space-y-1 overflow-y-auto" id="chat-history-list">
+            <!-- Chat history items will appear here -->
+        </div>
+        
+        <div class="p-4 border-t border-gray-800">
+            <button id="clear-chat" class="w-full flex items-center justify-center gap-2 p-3 rounded-lg text-gray-400 hover:bg-red-600 hover:text-white transition font-medium">
+                <i class="fa-solid fa-trash-can"></i> Clear Screen & DB
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col bg-gray-50 h-screen relative min-w-0">
+        <!-- Mobile Header -->
+        <header class="md:hidden bg-gray-900 text-white p-4 flex items-center justify-between shadow-md z-10">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-scale-balanced text-indigo-400"></i> LawGPT
+            </h1>
+            <div class="flex gap-3">
+                <button id="mobile-logout-btn" class="text-gray-300 hover:text-white">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+                <div class="relative">
+                    <select id="mobile-mode-select" class="bg-gray-800 text-white border border-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2">
+                        <option value="query">Legal Query</option>
+                        <option value="scan">Contract Scanner</option>
+                        <option value="generate">Document Gen</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <!-- Current Mode Indicator (Desktop) -->
+        <div class="hidden md:flex bg-white border-b border-gray-200 px-6 py-4 shadow-sm z-10 items-center justify-between">
+            <div>
+                <h2 id="current-mode-title" class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gavel text-indigo-500"></i> Legal Query Assistant
+                </h2>
+                <p id="current-mode-desc" class="text-sm text-gray-500 mt-1">Ask any legal question in plain language.</p>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="chat-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 scroll-smooth pb-8">
+            <!-- Welcome Message -->
+            <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center py-10">
+                <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                    <i class="fa-solid fa-scale-balanced text-4xl text-indigo-600"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Welcome to LawGPT</h2>
+                <p class="max-w-md text-gray-500 text-lg">Your AI-powered legal assistant.</p>
+                <div class="flex flex-wrap items-center justify-center gap-3 mt-8">
+                    <span class="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-600 shadow-sm border border-gray-200">Legal Q&A</span>
+                    <span class="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-600 shadow-sm border border-gray-200">Contract Analysis</span>
+                    <span class="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-600 shadow-sm border border-gray-200">Drafting</span>
+                </div>
+            </div>
+            <!-- Messages will be injected here by JS -->
+        </div>
+
+        <!-- Typing Indicator Container (Hidden by default) -->
+        <div id="loading-indicator" class="hidden absolute bottom-28 left-0 right-0 flex justify-center z-10 pointer-events-none">
+            <div class="bg-white px-5 py-3 rounded-full shadow-md border border-gray-200 flex items-center gap-3">
+                <span class="text-sm font-medium text-gray-600 font-semibold" id="loading-text">Analyzing...</span>
+                <div class="flex space-x-1.5">
+                    <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                    <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
+            <div class="max-w-4xl mx-auto w-full relative">
+                
+                <!-- File upload preview area -->
+                <div id="file-preview-container" class="hidden mb-3 p-3 bg-indigo-50 border border-indigo-100 rounded-lg flex items-center justify-between shadow-sm">
+                    <div class="flex items-center gap-3 truncate text-sm text-gray-700">
+                        <div class="p-2 bg-white rounded text-indigo-500 shadow-sm">
+                            <i class="fa-solid fa-file-lines text-lg"></i>
+                        </div>
+                        <div class="flex flex-col truncate">
+                            <span id="file-name" class="font-semibold text-gray-800 truncate">document.pdf</span>
+                            <span class="text-xs text-indigo-500">Ready to scan</span>
+                        </div>
+                    </div>
+                    <button id="remove-file" class="text-gray-400 hover:text-red-500 transition p-2 bg-white rounded-full hover:bg-red-50 shadow-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <form id="chat-form" class="relative flex items-end gap-2 border border-gray-300 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent bg-gray-50 shadow-sm transition">
+                    
+                    <!-- File input hidden -->
+                    <input type="file" id="file-upload" class="hidden" accept=".pdf,.docx,.txt">
+                    
+                    <!-- Upload button (Only active in Scanner mode) -->
+                    <button type="button" id="upload-btn" class="p-4 text-gray-400 hover:text-indigo-600 transition disabled:opacity-30 disabled:cursor-not-allowed" title="Upload Document">
+                        <i class="fa-solid fa-paperclip text-lg"></i>
+                    </button>
+
+                    <!-- Text Input -->
+                    <textarea 
+                        id="user-input" 
+                        class="w-full max-h-32 py-4 px-1 outline-none resize-none bg-transparent text-gray-800" 
+                        placeholder="Ask a legal question..." 
+                        rows="1"
+                        style="min-height: 56px;"
+                    ></textarea>
+
+                    <!-- Send Button -->
+                    <button type="submit" id="send-btn" class="p-3 text-indigo-600 hover:text-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed transition h-full flex items-end mb-1 mr-1">
+                        <div class="bg-indigo-600 text-white rounded-xl p-2 flex items-center justify-center w-10 h-10 hover:bg-indigo-700 shadow-sm transition-colors">
+                            <i class="fa-solid fa-paper-plane text-sm"></i>
+                        </div>
+                    </button>
+                </form>
+                <div class="text-center mt-3 text-xs text-gray-400 font-medium">
+                    LawGPT can make mistakes. Consider verifying important information. Do not use as formal legal advice.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
