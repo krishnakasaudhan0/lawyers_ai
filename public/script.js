@@ -3,7 +3,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentMode = 'query'; // query, scan, generate
     let selectedFile = null;
     let token = localStorage.getItem('token');
-    let user = JSON.parse(localStorage.getItem('user'));
+    let user = null;
+    try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser && storedUser !== 'undefined') {
+            user = JSON.parse(storedUser);
+        }
+    } catch(e) {
+        console.error('Failed to parse user from local storage:', e);
+    }
 
     // DOM Elements
     const chatContainer = document.getElementById('chat-container');
@@ -100,6 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
         loginError.classList.add('hidden');
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
+        
+        const btn = loginForm.querySelector('button[type="submit"]');
+        const originalText = btn.textContent;
+        btn.textContent = 'Wait... Logging in...';
+        btn.disabled = true;
 
         try {
             const res = await fetch('/api/auth/login', {
@@ -116,14 +129,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('user', JSON.stringify(user));
                 checkAuth();
             } else {
-                loginError.textContent = data.msg || 'Login failed';
+                loginError.textContent = data.msg || data.error || 'Login failed';
                 loginError.classList.remove('hidden');
             }
         } catch (err) {
-            loginError.textContent = 'Server error. Please try again.';
+            console.error('Login err:', err);
+            loginError.textContent = 'Server/Network error. Check console.';
             loginError.classList.remove('hidden');
+        } finally {
+            btn.textContent = originalText;
+            btn.disabled = false;
         }
     });
+
 
     // Handle Signup
     registerForm.addEventListener('submit', async (e) => {
@@ -132,6 +150,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('register-username').value;
         const email = document.getElementById('register-email').value;
         const password = document.getElementById('register-password').value;
+        
+        const btn = registerForm.querySelector('button[type="submit"]');
+        const originalText = btn.textContent;
+        btn.textContent = 'Wait... Signing up...';
+        btn.disabled = true;
 
         try {
             const res = await fetch('/api/auth/signup', {
@@ -148,14 +171,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('user', JSON.stringify(user));
                 checkAuth();
             } else {
-                registerError.textContent = data.msg || 'Signup failed';
+                registerError.textContent = data.msg || data.error || 'Signup failed';
                 registerError.classList.remove('hidden');
             }
         } catch (err) {
-            registerError.textContent = 'Server error. Please try again.';
+            console.error('Signup err:', err);
+            registerError.textContent = 'Server/Network error. Check console.';
             registerError.classList.remove('hidden');
+        } finally {
+            btn.textContent = originalText;
+            btn.disabled = false;
         }
     });
+
 
     // Logout
     logoutBtns.forEach(btn => {
