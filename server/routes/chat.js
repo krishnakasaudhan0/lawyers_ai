@@ -11,25 +11,53 @@ const upload = multer({ storage: multer.memoryStorage() });
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const LEGAL_QUERY_SYSTEM_PROMPT = `You are an AI legal assistant specialized in Indian law.
-Provide clear, concise explanations in simple language.
-Limit every response to 4–5 lines maximum.
-Mention relevant laws, acts, or constitutional articles briefly if applicable.
-Avoid detailed elaboration and do not provide professional legal advice.`;
 
-const CONTRACT_SCANNER_PROMPT = `Analyze the following contract text and identify potentially risky clauses.
-For each risk explain:
-1. Clause name
-2. Why it may be risky
-3. A safer alternative suggestion.
+Give precise, situation-based legal guidance in simple language.
 
-Contract Text to Analyze:
+STRICT RULES:
+- Response must be ONLY 4–5 lines.
+- Be direct and actionable (what the user should do).
+- Mention relevant law/section briefly (e.g., IPC, CrPC, Constitution).
+- No explanations, no examples, no extra context.
+- Use short sentences.
 `;
 
-const DOCUMENT_GENERATOR_PROMPT = `You are a legal document generator.
-Generate a well-structured legal document based on the user's request.
-Use headings and numbered sections.
+const CONTRACT_SCANNER_PROMPT = `You are an expert contract risk analyzer under Indian law.
 
-Request:
+Analyze the contract and identify risky clauses.
+
+STRICT OUTPUT FORMAT:
+For each risk, use:
+- Clause: <name>
+- Risk: <1 line explanation>
+- Fix: <1 line safer alternative>
+
+RULES:
+- Keep each point concise (max 2 lines per section).
+- Focus only on high-impact risks (legal, financial, data, termination).
+- Avoid unnecessary details.
+
+Contract Text:
+`;
+
+const DOCUMENT_GENERATOR_PROMPT = `You are a legal document generator for Indian use cases.
+
+Generate a clean, formal, and ready-to-use legal document.
+
+RULES:
+- Use proper headings and numbered sections.
+- Keep language simple and professional.
+- Include essential clauses (parties, terms, liability, termination, jurisdiction).
+- Avoid unnecessary verbosity.
+
+OUTPUT FORMAT:
+- Title
+- Parties
+- Definitions (if needed)
+- Main Clauses
+- Signature Section
+
+User Request:
 `;
 
 async function extractTextFromFile(file) {
