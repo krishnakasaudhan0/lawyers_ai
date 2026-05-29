@@ -1,0 +1,281 @@
+{
+  "info": {
+    "name": "Lawgpt Authentication APIs",
+    "description": "Collection for testing all authentication endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"TestPassword@123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/register",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "register"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Register - User Exists",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"TestPassword@123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/register",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "register"]
+        },
+        "description": "Testing duplicate user registration - should return 400"
+      },
+      "response": []
+    },
+    {
+      "name": "Register - Missing Fields",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"test2@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/register",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "register"]
+        },
+        "description": "Testing register with missing fields - should return 400"
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.user && jsonData.user.id) {",
+              "        pm.environment.set(\"userId\", jsonData.user.id);",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"TestPassword@123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login - Invalid Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"WrongPassword\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "login"]
+        },
+        "description": "Testing login with wrong password - should return 400"
+      },
+      "response": []
+    },
+    {
+      "name": "Login - Invalid Email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"nonexistent@example.com\",\n  \"password\": \"TestPassword@123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "login"]
+        },
+        "description": "Testing login with non-existent email - should return 400"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Me",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/auth/get-me",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "get-me"]
+        },
+        "description": "Get authenticated user details - requires valid auth token"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Me - No Token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cookie",
+            "value": "",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/auth/get-me",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "get-me"]
+        },
+        "description": "Testing get-me without auth token - should return 401"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Me - Invalid Token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cookie",
+            "value": "token=invalid_token"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/auth/get-me",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "get-me"]
+        },
+        "description": "Testing get-me with invalid token - should return 401"
+      },
+      "response": []
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/auth/logout",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "logout"]
+        },
+        "description": "Logout user and blacklist token"
+      },
+      "response": []
+    },
+    {
+      "name": "Logout - No Token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cookie",
+            "value": "",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/auth/logout",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "logout"]
+        },
+        "description": "Testing logout without token - should return 400"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
