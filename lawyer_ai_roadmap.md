@@ -163,4 +163,4 @@ To ensure the interface matches the premium nature of the application, follow th
 
 ### 3. Session and Rate Limiting
 * Protect endpoints against expensive LLM queries using `express-rate-limit`.
-* Cache common legal document lookups in Redis to eliminate database search lag.
+* Cache common legal document lookups in Redis to eliminate database search lag
