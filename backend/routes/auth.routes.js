@@ -1,13 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
-const cookieParser = require('cookie-parser');
-router.use(cookieParser());
 const authMiddleware = require('../middleware/auth.middleware');
-
-const User = require('../models/user.model');
 const authController = require('../controller/auth.controller');
 
 
@@ -24,12 +17,12 @@ router.post('/register', authController.registerUserController);
  */
 router.post('/login', authController.loginUserController);
 /** 
- * @route GET /api/auth/logout
+ * @route POST /api/auth/logout
  * @desc Logout a user,clear the token cookie
- * @access Public
+ * @access Private
  */
 
-router.get('/logout', authController.logoutUserController);
+router.post('/logout', authMiddleware, authController.logoutUserController);
 
 /**
  * @route GET /api/auth/get-me

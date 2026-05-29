@@ -4,7 +4,8 @@ require('dotenv').config();
 
 async function connectDB() {
     try {
-        const dbURI = process.env.MONGO_DB_URI || process.env.MONGODB_URI || "mongodb+srv://kasaudhankrishna05_db_user:1CGda8iUBoqw7ilo@krishna.hkhes2p.mongodb.net/lawyersai";
+        const dbURI = process.env.MONGO_DB_URI || process.env.MONGODB_URI;
+        if (!dbURI) { throw new Error('MONGO_DB_URI environment variable is not set'); }
         await mongoose.connect(dbURI);
         console.log('Connected to MongoDB');
     } catch (error) {

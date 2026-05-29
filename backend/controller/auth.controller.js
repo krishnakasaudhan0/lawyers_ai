@@ -4,6 +4,12 @@ const jwt = require('jsonwebtoken');
 const tokenBlacklistModel = require("../models/blacklist.model");
 require('dotenv').config();
 
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 24 * 60 * 60 * 1000 // 1 day
+};
 
 /**
  * @name resgisterUserController
@@ -40,7 +46,7 @@ async function registerUserController(req, res) {
 
         const token = jwt.sign({ id : newUser._id,username: newUser.username }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-        res.cookie('token', token);
+        res.cookie('token', token, cookieOptions);
 
         res.status(201).json({ message: 'User registered successfully' ,
             user:{
@@ -51,6 +57,10 @@ async function registerUserController(req, res) {
         });
     } catch (error) {
         console.error('Error registering user:', error);
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
+            return res.status(400).json({ message: `${field} already exists` });
+        }
         res.status(500).json({ message: 'Server error' });
     }
 }
@@ -85,7 +95,7 @@ async function loginUserController(req, res) {
 
         const token = jwt.sign({ id : existingUser._id,username: existingUser.username }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-        res.cookie('token', token);
+        res.cookie('token', token, cookieOptions);
 
         res.status(200).json({ message: 'User logged in successfully',
             user:{

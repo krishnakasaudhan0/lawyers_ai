@@ -52,6 +52,9 @@ async function getsessionbyidcontroller(req, res) {
         if (!session) {
             return res.status(404).json({ message: 'Chat session not found' });
         }
+        if (session.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
         res.status(200).json(session);
     } catch (err) {
         console.error('Error fetching chat session:', err);
@@ -70,10 +73,13 @@ async function addmessagecontroller(req, res) {
     }
 
     try {
-        // Check if chat session exists
+        // Check if chat session exists and belongs to the user
         const chatSession = await chatmodel.findById(sessionId);
         if (!chatSession) {
             return res.status(404).json({ message: 'Chat session not found' });
+        }
+        if (chatSession.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Access denied' });
         }
 
         // Create new user message
@@ -119,10 +125,13 @@ async function addmessagecontroller(req, res) {
 async function getmessagesbyidcontroller(req, res) {
     const sessionId = req.params.id;
     try {
-        // Check if chat session exists
+        // Check if chat session exists and belongs to the user
         const chatSession = await chatmodel.findById(sessionId);
         if (!chatSession) {
             return res.status(404).json({ message: 'Chat session not found' });
+        }
+        if (chatSession.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Access denied' });
         }
         
         // Fetch messages for the chat session
@@ -140,6 +149,9 @@ async function archivechatcontroller(req, res) {
         const chatSession = await chatmodel.findById(sessionId);
         if (!chatSession) {
             return res.status(404).json({ message: 'Chat session not found' });
+        }
+        if (chatSession.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Access denied' });
         }
         chatSession.status = 'archived';
         await chatSession.save();
