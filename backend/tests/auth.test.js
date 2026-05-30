@@ -41,6 +41,15 @@ describe('Authentication APIs', () => {
         }
     });
 
+    beforeEach(async () => {
+        try {
+            const Blacklist = require('../models/blacklist.model');
+            await Blacklist.deleteMany({});
+        } catch (error) {
+            console.log('Error clearing blacklist:', error.message);
+        }
+    });
+
     // Disconnect after all tests
     afterAll(async () => {
         try {
@@ -195,16 +204,17 @@ describe('Authentication APIs', () => {
     });
 
     // Test Logout API
-    describe('GET /api/auth/logout', () => {
+    describe('POST /api/auth/logout', () => {
         it('should logout user successfully', async () => {
             // First login
             const loginResponse = await request(app)
                 .post('/api/auth/login')
-                .send(testUserLogin);
+                .send(testUserLogin)
+                .expect(200);
 
             // Then logout
             const response = await request(app)
-                .get('/api/auth/logout')
+                .post('/api/auth/logout')
                 .set('Cookie', loginResponse.headers['set-cookie'])
                 .expect(200);
 
@@ -213,22 +223,24 @@ describe('Authentication APIs', () => {
 
         it('should reject logout without token', async () => {
             const response = await request(app)
-                .get('/api/auth/logout')
-                .expect(400);
+                .post('/api/auth/logout')
+                .expect(401);
 
-            expect(response.body).toHaveProperty('message', 'No token provided');
+            expect(response.body).toHaveProperty('message', 'Unauthorized, no token provided');
         });
 
         it('should clear the auth cookie on logout', async () => {
             // First login
             const loginResponse = await request(app)
                 .post('/api/auth/login')
-                .send(testUserLogin);
+                .send(testUserLogin)
+                .expect(200);
 
             // Then logout
             const response = await request(app)
-                .get('/api/auth/logout')
-                .set('Cookie', loginResponse.headers['set-cookie']);
+                .post('/api/auth/logout')
+                .set('Cookie', loginResponse.headers['set-cookie'])
+                .expect(200);
 
             // Check if cookie is cleared
             const setCookieHeader = response.headers['set-cookie'];
