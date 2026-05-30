@@ -1,0 +1,25 @@
+# Render Blueprint configuration for Lawgpt
+# For details on the blueprint format, see https://render.com/docs/blueprints
+services:
+  - type: web
+    name: lawgpt
+    env: node
+    plan: free
+    # Build command installs both root (backend) and frontend dependencies, then builds the frontend
+    buildCommand: npm install && npm run build
+    # Start command runs the unified Express server which serves both the API and the built static frontend
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_DB_URI
+        sync: false
+        description: "MongoDB Atlas connection string (e.g., mongodb+srv://...)"
+      - key: JWT_SECRET
+        sync: false
+        description: "A secure random string used to sign JWT authentication tokens"
+      - key: GEMINI_API_KEY
+        sync: false
+        description: "Google Gemini API Key for law AI chat generation"
+      - key: PORT
+        value: 10000

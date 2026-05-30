@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 require('dotenv').config();
 const app = express();
 const connectDB = require('./config/db');
@@ -21,6 +22,18 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 
 app.use('/api/chat', chatRoutes);
+
+// Serve static assets in production or on Render (outside of Vercel serverless)
+if (process.env.NODE_ENV === 'production' || process.env.RENDER || !process.env.VERCEL) {
+    app.use(express.static(path.join(__dirname, '../public')));
+    
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api')) {
+            return next();
+        }
+        res.sendFile(path.join(__dirname, '../public', 'index.html'));
+    });
+}
 
 // Start the server
 const PORT = process.env.PORT || 3000;
